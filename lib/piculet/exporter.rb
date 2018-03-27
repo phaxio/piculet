@@ -51,6 +51,7 @@ module Piculet
 
       ip_permissions = ip_permissions.map do |ip_perm|
         {
+	  :description => ip_perm.description,
           :protocol   => ip_perm.protocol,
           :port_range => ip_perm.port_range,
           :ip_ranges  => ip_perm.ip_ranges.sort,

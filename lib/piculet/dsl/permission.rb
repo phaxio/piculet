@@ -10,6 +10,7 @@ module Piculet
               @security_group = security_group
               @direction = direction
               @protocol_prot_range = protocol_prot_range
+	      @description = ""
 
               @context = context.merge(
                 :protocol => protocol_prot_range[0],
@@ -29,6 +30,10 @@ module Piculet
             end
 
             private
+	    def description(value)
+		@result.description = value
+	    end
+
             def ip_ranges(*values)
               if values.empty?
                 raise ArgumentError, "SecurityGroup `#{@security_group}`: #{@direction}: #{@protocol_prot_range}: `ip_ranges`: wrong number of arguments (0 for 1..)"
