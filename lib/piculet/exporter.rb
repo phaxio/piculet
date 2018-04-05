@@ -54,6 +54,7 @@ module Piculet
           :protocol   => ip_perm.protocol,
           :port_range => ip_perm.port_range,
           :ip_ranges  => ip_perm.ip_ranges.sort,
+          :description => ip_perm.description,
           :groups => ip_perm.groups.map {|group|
             {
               :id       => group.id,
