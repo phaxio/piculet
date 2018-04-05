@@ -21,7 +21,7 @@ module Piculet
               OpenStruct.new({
                 :protocol   => protocol,
                 :port_range => port_range,
-                :description => perm.description,
+                :description => perm.description || @description,
                 :ip_ranges  => perm.ip_ranges,
                 :groups     => perm.groups,
               })
@@ -29,6 +29,11 @@ module Piculet
           end
 
           private
+
+          def description(value)
+            @description = value
+          end
+
           def permission(protocol, port_range = nil, &block)
             if port_range
               if port_range.kind_of?(Integer)
