@@ -21,6 +21,7 @@ module Piculet
               OpenStruct.new({
                 :protocol   => protocol,
                 :port_range => port_range,
+                :description => perm.description,
                 :ip_ranges  => perm.ip_ranges,
                 :groups     => perm.groups,
               })
