@@ -47,16 +47,17 @@ module Piculet
             res = Permission.new(@context, @security_group, @direction, key, &block).result
 
             if @result.has_key?(key)
-              # TODO Remove
-              log(:warn, "Key #{key.inspect} is already present in the result", :yellow)
               @result[key] = OpenStruct.new(@result[key].marshal_dump.merge(res.marshal_dump) {|hash_key, old_val, new_val|
-                # TODO Remove
-                log(:warn, "Hash Key: #{hash_key}, old val: #{old_val}, new val: #{new_val}", :yellow)
-                if (duplicated = old_val & new_val).any?
-                  log(:warn, "SecurityGroup `#{@security_group}`: #{@direction}: #{key}: #{hash_key}: #{duplicated} are duplicated", :yellow)
-                end
+                if hash_key.to_s == 'description'
+                  # If for some reason we have multiple descriptions, merge them.
+                  [old_val, new_val].join('/')
+                else
+                  if (duplicated = old_val & new_val).any?
+                    log(:warn, "SecurityGroup `#{@security_group}`: #{@direction}: #{key}: #{hash_key}: #{duplicated} are duplicated", :yellow)
+                  end
 
-                old_val | new_val
+                  old_val | new_val
+                end
               })
             else
               @result[key] = res
