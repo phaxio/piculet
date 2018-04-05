@@ -80,6 +80,10 @@ module Piculet
 
               @result.groups = values
             end
+
+            def description(value)
+              @result.description = value
+            end
           end # Permission
         end # Permissions
       end # SecurityGroup
