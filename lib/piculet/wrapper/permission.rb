@@ -9,7 +9,7 @@ module Piculet
 
             def_delegators(
               :@permission,
-              :protocol, :port_range, :ip_ranges, :groups)
+              :protocol, :port_range, :description, :ip_ranges, :groups)
 
             def initialize(permission, collection, options)
               @permission = permission
