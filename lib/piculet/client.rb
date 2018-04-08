@@ -13,6 +13,64 @@ module Piculet
       AWS.memoize { walk(file) }
     end
 
+    def patch(file, output_file)
+      dsl_result = load_file(file)
+      dest_data = JSON.parse File.read(output_file)
+
+      # [vpc_name, sg.name, ingress/egress]
+      dsl_result.ec2s.each do |vpc_name, ec2_result|
+        ec2_result.security_groups.each do |sg|
+          %w(ingress egress).each do |direction|
+            sg.send(direction).each do |perm_result|
+              next if perm_result.description.nil?
+
+              error_message = <<~STR
+                Unable to find permission in the destination:
+                  VPC: #{vpc_name}
+                  SG: #{sg.name}
+                  Direction: #{direction}
+                  Protocol: #{perm_result.protocol}
+                  Port Range: #{perm_result.port_range}
+                  Description: #{perm_result.description}
+              STR
+
+              sg_match = dest_data[vpc_name].find { |sg_id, sg_data|
+                sg_data['name'] == sg.name
+              }.last
+
+              if sg_match.nil?
+                log(:error, error_message, 'red')
+                raise 'Permission Not Found'
+              end
+
+              perms = sg_match[direction]
+              perm_match = perms.find { |perm|
+                check_protocol = perm_result.protocol.to_s
+                check_port_range = if perm_result.port_range.nil?
+                  nil
+                else
+                  [perm_result.port_range.begin, perm_result.port_range.end].join('..')
+                end
+                proto_match = perm['protocol'] == check_protocol
+                port_range_match = perm['port_range'] == check_port_range
+                proto_match && port_range_match
+              }
+
+              if perm_match.nil?
+                log(:error, error_message, 'red')
+                raise 'Permission Not Found'
+              end
+
+              perm_match['description'] = perm_result.description
+            end
+          end
+        end
+      end
+
+      new_filename = "#{File.basename(output_file, '.json')}-updated.json"
+      File.write(new_filename, JSON.pretty_generate(dest_data))
+    end
+
     def should_skip(sg_name, sg)
       # Name
       if @options.sg_names

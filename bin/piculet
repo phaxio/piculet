@@ -37,6 +37,7 @@ ARGV.options do |opt|
     opt.on('-s', '--secret-key SECRET_KEY')         {|v| secret_key                   = v           }
     opt.on('-r', '--region REGION')                 {|v| region                       = v           }
     opt.on('-a', '--apply')                         {|v| mode                         = :apply      }
+    opt.on('-p', '--patch-descriptions')            {|v| mode                         = :patch      }
     opt.on('-f', '--file FILE')                     {|v| file                         = v           }
     opt.on('-n', '--names SG_LIST', Array)          {|v| options[:sg_names]           = v           }
     opt.on('-x', '--exclude SG_LIST', Array)        {|v| options[:exclude_sgs]        = v           }
@@ -209,6 +210,16 @@ begin
     updated = client.apply(file)
 
     logger.info('No change'.intense_blue) unless updated
+  when :patch
+    [file, output_file].each do |f|
+      unless File.exist?(f)
+        raise "No Groupfile found (looking for: #{file})"
+      end
+    end
+
+    msg = "Patch descriptions from `#{file}` to #{output_file}"
+    logger.info(msg)
+    client.patch(file, output_file)
   else
     raise 'must not happen'
   end
